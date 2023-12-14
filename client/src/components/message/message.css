@@ -1,0 +1,41 @@
+.message {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+.messageTop {
+  display: flex;
+}
+
+.messageImg {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.messageText {
+  padding: 10px;
+  border-radius: 20px;
+  background-color: #1877f2;
+  color: white;
+  max-width: 300px;
+}
+
+.messageBottom {
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+/*If the div that also has message class also has the own class as well*/
+.message.own {
+  align-items: flex-end;
+}
+
+/* when there are 2 classes message and own on the parent div. change the messageText to be come...... */
+
+.message.own .messageText {
+  background-color: rgb(239, 239, 239);
+  color: black;
+}
