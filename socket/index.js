@@ -1,11 +1,18 @@
+//HOW TO CONNECT TO SOCKET.IO
+//By default, it wont allow anyone to connect to socket.io so you have to identify here, wheer you want the origin / src to be at
+//Eventually you have the change the .env in it
 const io = require("socket.io")(8900, {
   cors: {
     origin: "http://localhost:3000",
   },
 });
 
+//ONLY ACTIVE USERS WILL BE HERE!
+//If disconnected, the removeUser will replace it.
 let users = [];
 
+//If the user being added is not currently inside of users array, add it into users array as an object with
+//User id and socket id
 const addUser = (userId, socketId) => {
   !users.some((user) => user.userId === userId) &&
     users.push({ userId, socketId });

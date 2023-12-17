@@ -12,6 +12,9 @@ const Conversation = ({ conversation, currentUser }) => {
       if (m !== currentUser._id) return currentUser._id;
     });
 
+    //This is called if you want to add specific user detail to your webpage of the person your having a conversation with.
+    //In our case, we want to add the receivers name on the side bar. This component is given the conversation details
+    //However, we need the names of the reciever so our users know who they have conversations with.
     const getUser = async () => {
       try {
         //AXIOS without post is assumed to be a get request. userID is used as a query object.

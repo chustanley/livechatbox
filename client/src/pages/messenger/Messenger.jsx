@@ -10,20 +10,31 @@ import axios from "axios";
 import { io } from "socket.io-client";
 
 const Messenger = () => {
+  //This keeps track of multiple conversations on the side RELATED to the user.
   const [conversations, setConversations] = useState([]);
+
+  //These states are for the current we are speaking to, and the messages inside of it as well.
   const [currentChat, setCurrentChat] = useState(null);
   const [messages, setMessages] = useState([]);
+
+  //This state is for the newly generated message that we are ADDING onto the conversation.
   const [newMessage, setNewMessage] = useState("");
 
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
+  //This gets the 'user data' from the useContext state
   const { user } = useContext(AuthContext);
 
   const scrollRef = useRef();
   const socket = useRef();
 
   useEffect(() => {
+    console.log("arrival message", arrivalMessage);
+  }, [arrivalMessage]);
+
+  useEffect(() => {
     socket.current = io("ws://localhost:8900");
+    //THIS IS SETTING UP AN EVENT LISTENER? I DONT THINK IT TRIGGERS ON FIRST RENDER UNTIL A MESSAGE IS SENT
     socket.current.on("getMessage", (data) => {
       setArrivalMessage({
         sender: data.senderId,
@@ -39,8 +50,7 @@ const Messenger = () => {
       setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage, currentChat]);
 
-  console.log("socket", socket);
-
+  //This is just showing us the users that are currently logged in and not disconnected.
   useEffect(() => {
     socket.current.emit("addUser", user._id);
     socket.current.on("getUsers", (users) => {
@@ -48,6 +58,8 @@ const Messenger = () => {
     });
   }, [user]);
 
+  //UPON id change, we will get ALL CONVERSATIONS related to that user and ASSIGN it to the conversation state
+  //This generates ALL conversations related to the user._id
   useEffect(() => {
     const getConversations = async () => {
       try {
@@ -61,6 +73,8 @@ const Messenger = () => {
     getConversations();
   }, [user._id]);
 
+  //Upon currentChat changing upon clicking in the list of conversations, we will send a get request along with that conversationID!!!
+  //and set the messages state with all of the messaged tailored to that convo ! we use CONVO ID!!!
   useEffect(() => {
     const getMessages = async () => {
       try {
@@ -73,10 +87,12 @@ const Messenger = () => {
     getMessages();
   }, [currentChat]);
 
+  //Whenever messages change, meaning when you send a message or if i send a message, this with the useRef it will autoscroll to it!
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  //This is for submitting a newMessage. We create a messageobject with the newMessage data inside of it.
   const handleSubmit = async (e) => {
     e.preventDefault(); // prevent rerender of page!
     const message = {
@@ -98,6 +114,21 @@ const Messenger = () => {
       text: newMessage,
     });
 
+    //This is adding the newMessage into MONGODB and after it sucessfully adds into the db,
+    //We spread the currentMessages and add res.data (the new message) into the end
+    //So that it can "auto render" WITHIN our OWN localhost account.
+
+    /*
+    THIS WILL AUTO UPDATE MESSAGES THAT YOU SEND INTO THE BIG CHAT BOX IMMEDIATELY WITHOUT SOCKET.IO!!!!'
+
+    We need Socket IO to retrieve the messages from THE OTHER USER!!
+
+
+    SO TECHNICALLY, after it does the socket.io transaction that triggers event listners, itll then go ahead and save that sent message into the database.....
+
+    WOOWW.....
+    */
+
     try {
       const res = await axios.post("/messages", message);
       console.log("new message", res.data);
@@ -117,7 +148,9 @@ const Messenger = () => {
           <div className="chatMenuWrapper">
             <input placeholder="Search for friends" className="chatMenuInput" />
             {conversations.map((c) => {
-              //This will get the conversation ID...
+              //FOR each conversaion related to one user, we will pass the currentUser to it and also the conversation data for EACH conversation.
+              //When any of them are clicked, we update the currentChat with the value inside of conversations
+              //Upon click, currentChat will be updated with a new message:[user1, you]
               return (
                 <div
                   onClick={() => {
@@ -132,6 +165,13 @@ const Messenger = () => {
         </div>
         <div className="chatBox">
           {currentChat ? (
+            //THIS IS VERY IMPORTANT.
+            /*
+            We are iterating through the messages state that has now generated an array for all the messages of a specific conversation.
+            REMEMBER, this component is rendered based on the users._id meaning that if stanley logged in the userId would be different than if idk quyen came in.
+            With that being said, it would change the "own" prop that message component would receive and based off of this condition, we will render different CSS!!!!!!!
+
+            */
             <div className="chatBoxWrapper">
               <div className="chatBoxTop">
                 {messages.map((m) => {
@@ -143,6 +183,7 @@ const Messenger = () => {
                 })}
               </div>
               <div className="chatBoxBottom">
+                {/* on Change, we will add the newly updated value into newMessage state. */}
                 <textarea
                   className="chatMessageInput"
                   placeholder="write something..."
@@ -157,6 +198,7 @@ const Messenger = () => {
               </div>
             </div>
           ) : (
+            //IF NO CURRENT CHAT!!!!!!!
             <span className="noConversationText">PICK A CONVERSATION</span>
           )}
         </div>

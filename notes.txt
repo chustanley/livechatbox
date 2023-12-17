@@ -1,0 +1,54 @@
+SOCKETio
+- Socket server is created and when a user is connected, it will be passed a socket.id
+- SOCKET.io is not a database necessarily. ITS a websocket that connects another ID to another user ID
+
+Checkout socket.io emit cheatsheet
+
+
+HOW to start:
+- npm init -y to create a package.json file
+- npm add nodemon to have hotreloading
+  - ADD nodemon __ file name __ to run that file on package.json
+- npm add socket.io
+
+
+Inside of client side front end, npm install socket.io-client
+- import {io} from "socket.io-client"
+- use io("ws://localhost:8900") to connect to the server of socket.io!
+
+
+Inside of index.js
+- connect to client. please check the file
+
+
+
+
+THIS IS HOW THE SOCKETS COMMUNICATE WITH EACH OTHER!!
+
+SOCKET server
+- If you want to send event to client.. use "io"
+  - io.emit: send a message to every client
+    - io.emit("message tag", "the message")
+  - io.to(socketID of other user).emit
+
+- take EVENT from client.. use socket.on
+
+
+CLIENT SIDE
+- Send event to server: socket.emit
+- Take Event From server: socket.on
+  - socket.on("message tag", (message) => { console.log("should show the message", message) })
+
+
+
+
+
+HOW TO SEND MESSAGE TO USERS CONTINUOUSLY SINCE THE SOCKET id changes when uses connect and disconnect.
+
+1. useRef to create connection and send to socket.io THE user ID.
+ - this isnt a good idea because everytime the component refresh, it will always reassign the socket.io connection
+
+
+
+
+
